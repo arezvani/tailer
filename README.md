@@ -64,6 +64,14 @@ Processing new pod: recreated-pod
 3. Ensure `kubectl` is installed and configured to access the target Kubernetes cluster.
 4. Run the script with the desired arguments.
 
+### Docker
+```
+docker run alirezvani76/tailer:latest python tailer.py -n my-namespace -o logs.txt --exclude-containers container1,container2 --exclude-pods pod1,pod2
+```
+
+### K8S
+You can use as this [examples](./k8s/)
+
 ## Limitations
 1. Tailer relies on `kubectl` for log collection, and its behavior is subject to Kubernetes API limitations.
 2. Log streams may briefly pause during the periodic refresh cycle.
