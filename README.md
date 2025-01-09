@@ -1,7 +1,7 @@
 # Tailer Tool
 
 ## Overview
-**Tailer** is a tool designed to dynamically monitor Kubernetes pod logs, ensuring that logs from all containers, including new and recreated pods, are collected without missing critical events. Tailer overcomes Kubernetes’ default connection timeout limitations and provides a robust solution for long-term log collection.
+**Tailer** is a tool designed to dynamically monitor Kubernetes pod logs, ensuring that logs from all containers, including new and recreated pods, are collected without missing critical events. Tailer overcomes Kubernetes’ default connection timeout limitations and provides a robust solution for long-term log collection. Tools like Stern and Kail also face the same challenge due to Kubernetes’ default connection timeout limitations, which can disrupt long-term log monitoring. Tailer overcomes these issues and provides a robust solution for persistent log collection.
 
 ## Problem Statement
 ### Kubernetes Default Idle Connection Timeout (4h)
