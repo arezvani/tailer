@@ -11,6 +11,8 @@ Kubernetes enforces a default idle connection timeout of 4 hours (`streamingConn
 2. **Confusion and Non-intuitive Defaults**: The default 4-hour timeout is not explicitly documented in many contexts, leaving users unaware of why their connections are dropping.
 3. **Operational Challenges**: Systems requiring continuous log monitoring must implement their own mechanisms to detect and restart closed connections, adding complexity to tool design.
 
+![Problem](./problem.jpeg)
+
 For more details, refer to:
 - Kubernetes Issue [#104580](https://github.com/kubernetes/kubernetes/issues/104580)
 - Kubernetes Discussion [#104595](https://github.com/kubernetes/kubernetes/issues/104595#issuecomment-906082442)
