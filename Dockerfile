@@ -2,6 +2,12 @@ FROM bitnami/kubectl:latest AS kubectl_source
 
 FROM python:3.11-slim
 
+ENV PIP_DEFAULT_TIMEOUT=1000 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+
 WORKDIR /app
 
 COPY python/tailer.py /app/tailer.py
