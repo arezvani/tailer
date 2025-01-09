@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: log-collector
+  name: log-collector
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: log-collector
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: log-collector
+    spec:
+      containers:
+      - command:
+        - /bin/sh
+        - -c
+        - python3 tailer.py -n my-namespace -o /var/log/containers.log --exclude-containers stern,filebeat,logrotate
+        image: alirezvani76/tailer:0.1
+        imagePullPolicy: IfNotPresent
+        name: stern
+        resources:
+          limits:
+            cpu: 1000m
+            ephemeral-storage: 2Gi
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            ephemeral-storage: 100Mi
+            memory: 128Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/log
+          name: shared-data
+      - args:
+        - -c
+        - /etc/filebeat.yml
+        - -e
+        image: elastic/filebeat:8.5.1
+        imagePullPolicy: IfNotPresent
+        name: filebeat
+        resources:
+          limits:
+            cpu: 1000m
+            ephemeral-storage: 2Gi
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            ephemeral-storage: 100Mi
+            memory: 128Mi
+        securityContext:
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/log
+          name: shared-data
+        - mountPath: /etc/filebeat.yml
+          name: filebeat-conf
+          readOnly: true
+          subPath: filebeat.yml
+        - mountPath: /usr/share/filebeat/config/certs
+          name: elasticsearch-certs
+          readOnly: true
+      - env:
+        - name: FILE_USER
+          value: root
+        - name: FILE_GROUP
+          value: root
+        - name: LOG_FILES
+          value: /var/log/containers.log
+        - name: LOGROTATE_SIZE
+          value: 1000K
+        - name: LOGROTATE_COUNT
+          value: "5"
+        - name: LOGROTATE_MODE
+          value: create 0644
+        - name: LOGROTATE_SCHEDULE
+          value: "60"
+        image: local_repo/logrotate:1.0.3
+        imagePullPolicy: IfNotPresent
+        name: logrotate
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 2Gi
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            ephemeral-storage: 100Mi
+            memory: 128Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/log
+          name: shared-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: log-collector
+      serviceAccountName: log-collector
+      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir:
+          sizeLimit: 2Gi
+        name: shared-data
+      - configMap:
+          defaultMode: 416
+          name: log-collector
+        name: filebeat-conf
+      - name: elasticsearch-certs
+        secret:
+          defaultMode: 420
+          secretName: elastic-crt
